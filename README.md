@@ -1,4 +1,5 @@
 --------------ENGLISH--------------------
+
 -Windows Defender PowerShell Script Extension-
 
 This PowerShell script I've created acts as an extension for Windows Defender. Its primary goal is to enhance the security of the Windows operating system by automating several essential checks.
