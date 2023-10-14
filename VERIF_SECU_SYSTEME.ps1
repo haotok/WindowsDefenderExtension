@@ -63,9 +63,9 @@ $progressBar.Value = 0
 "`nVérification du Pare-feu Windows :" | Out-File -FilePath $chemin -Append
 $firewallStatus = (Get-NetFirewallProfile -PolicyStore Local).Enabled
 if ($firewallStatus -contains $false) {
-    "Attention: Le Pare-feu Windows est désactivé." | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>> Attention: Le Pare-feu Windows est désactivé." | Out-File -FilePath $chemin -Append
 } else {
-    "Le Pare-feu Windows est activé." | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>> Le Pare-feu Windows est activé." | Out-File -FilePath $chemin -Append
 }
 
  $progressBar.Value = 1
@@ -76,11 +76,11 @@ if ($firewallStatus -contains $false) {
 $defender = Get-CimInstance -Namespace "root\SecurityCenter2" -ClassName "AntiVirusProduct" | Where-Object { $_.displayName -eq "Windows Defender" }
 
 if ($defender) {
-Write-Log "--------Windows Defender est activé et à jour.-----------" | Out-File -FilePath $chemin -Append
+Write-Log ">>>>>>>>>>>>>> Windows Defender est activé et à jour." | Out-File -FilePath $chemin -Append
 } 
 
 else {
-Write-Log "-----------------Attention: Windows Defender n'est pas activé ou pas à jour.-----------------" | Out-File -FilePath $chemin -Append
+Write-Log ">>>>>>>>>>>>>> Attention: Windows Defender n'est pas activé ou pas à jour." | Out-File -FilePath $chemin -Append
 }
 
 $progressBar.Value = 2
@@ -92,7 +92,7 @@ $autoUpdateStatus = (Get-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\W
 if ($autoUpdateStatus -eq 4) {
     "Les mises à jour automatiques sont activées." | Out-File -FilePath $chemin -Append
 } else {
-    "------------Attention: Les mises à jour automatiques ne sont pas activées.-----------------" | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>> Attention: Les mises à jour automatiques ne sont pas activées." | Out-File -FilePath $chemin -Append
 }
 
 $progressBar.Value = 3
@@ -111,7 +111,7 @@ function Write-Log {
 }
 
 # Vérification si il y a des mises à jour de sécurité en attente dans Windows Update
-Write-Log "-----------------Vérification si il y a des mises à jour de sécurité en attente dans Windows Update :-----------------"
+Write-Log ">>>>>>>>>>>>>> Vérification si il y a des mises à jour de sécurité en attente dans Windows Update :"
 $Session = New-Object -ComObject "Microsoft.Update.Session"
 $Searcher = $Session.CreateUpdateSearcher()
 $Criteria = "IsInstalled=0 and Type='Software' and IsHidden=0 and CategoryIDs contains 'e6cf1350-c01b-414d-a61f-263d14d133b4'"
@@ -121,7 +121,7 @@ if ($SearchResult.Count -gt 0) {
     foreach ($Update in $SearchResult) {
         Write-Log "Mise à jour en attente : $($Update.Title)"
     }
-} else {"-----------------Aucune mise à jour de sécurité en attente.-----------------" | Out-File -FilePath $chemin -Append
+} else {">>>>>>>>>>>>>> Aucune mise à jour de sécurité en attente." | Out-File -FilePath $chemin -Append
 }
 
 $progressBar.Value = 4
@@ -135,7 +135,7 @@ if ($adminAccounts) {
 $adminAccounts | ForEach-Object { "Compte: $($_.Name)" | Out-File -FilePath $chemin -Append }
 
 } else {
-    "-----------------Aucun compte d'administrateur n'est activé.-----------------" | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>> Aucun compte d'administrateur n'est activé." | Out-File -FilePath $chemin -Append
 }
 
 $progressBar.Value = 5
@@ -152,7 +152,6 @@ foreach ($connexion in $connexions) {
         Write-Log "Local: $($connexion.LocalAddress):$portLocal"
         Write-Log "Distant: $($connexion.RemoteAddress):$portDistant"
         Write-Log "VERIFIEZ SI CES PORTS OUVERTS SONT LEGITIMES ET UTILES AVEC LA COMMANDE: #Get-NetTCPConnection | Where-Object { $_.State -eq 'Established' }"
-        Write-Log "----------------------------------------"
     }
 }
 
@@ -176,7 +175,7 @@ $ports = @{
 foreach ($port in $ports.Keys) {
     if (Test-NetConnection -ComputerName localhost -Port $port -InformationLevel Quiet) {
         $message = $ports[$port]
-        Write-Log "Port ouvert : $port - $message"
+        Write-Log ">>>>>>>>>>>>>> Port ouvert : $port - $message"
     }
 }
 
@@ -189,13 +188,13 @@ $progressBar.Value = 7
 $sharedFolders = Get-SmbShare | Where-Object -Property Name -ne 'IPC$'
 
 if ($sharedFolders) {
-    Write-host "Attention: Les dossiers partagés suivants ont été trouvés :"
-    $sharedFolders | ForEach-Object { Write-host "Dossier: $($_.Name)" }
+    Write-Log ">>>>>>>>>>>>>> Attention: Les dossiers partagés suivants ont été trouvés :"
+    $sharedFolders | ForEach-Object { Write-Log ">>>>>>>>>>>>>> Dossier: $($_.Name)" }
     $sharedFolders | ForEach-Object { "Dossier: $($_.Name)" | Out-File -FilePath $chemin -Append }
 
 } else {
 
-    "-----------------Aucun dossier partagé n'a été trouvé.-----------------" | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>> Aucun dossier partagé n'a été trouvé." | Out-File -FilePath $chemin -Append
 }
 
 
@@ -218,12 +217,12 @@ function Write-Log {
 Write-Log "`nVérification de l'activation de l'UAC :" -ForegroundColor Yellow
 $UACStatus = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System").EnableLUA
 if ($UACStatus -eq 0) {
-    Write-Log "Attention: UAC (User Account Control) est désactivé."
-    $message = "-----------------Pour activer l'UAC, veuillez ouvrir le Panneau de configuration, cliquer sur 'Comptes d'utilisateurs', puis cliquer sur 'Modifier les paramètres de contrôle de compte d'utilisateur' et déplacer le curseur vers le haut.-----------------"
+    Write-Log ">>>>>>>>>>>>>> Attention: UAC (User Account Control) est désactivé."
+    $message = ">>>>>>>>>>>>>> Pour activer l'UAC, veuillez ouvrir le Panneau de configuration, cliquer sur 'Comptes d'utilisateurs', puis cliquer sur 'Modifier les paramètres de contrôle de compte d'utilisateur' et déplacer le curseur vers le haut."
     $wshell = New-Object -ComObject Wscript.Shell
-    $wshell.Popup($message, 0, "-----------------UAC désactivé-----------------", 0x1)
+    $wshell.Popup($message, 0, ">>>>>>>>>>>>>> UAC désactivé", 0x1)
 } else {
-    Write-Log "-----------------UAC (User Account Control) est activé.-----------------"
+    Write-Log ">>>>>>>>>>>>>> UAC (User Account Control) est activé."
 }
 
 $progressBar.Value = 9
@@ -232,9 +231,9 @@ $progressBar.Value = 9
 Write-Log "`nVérification de l'activation de BitLocker :"
 $BitLockerStatus = Get-BitLockerVolume -MountPoint C:
 if ($BitLockerStatus.ProtectionStatus -ne "On") {
-    Write-Log "-----------------Attention: BitLocker n'est pas activé sur le disque système. VEUILLEZ L'ACTIVER POUR DES RAISONS DE SECURITE.-----------------"
+    Write-Log ">>>>>>>>>>>>>> Attention: BitLocker n'est pas activé sur le disque système. VEUILLEZ L'ACTIVER POUR DES RAISONS DE SECURITE.-----------------"
 } else {
-    Write-Log "-----------------BitLocker est activé sur le disque système.-----------------"
+    Write-Log ">>>>>>>>>>>>>> BitLocker est activé sur le disque système."
 }
 
 $progressBar.Value = 10
@@ -245,14 +244,14 @@ Write-Log "`nVérification du service $serviceName :"
 try {
     $serviceStatus = Get-Service | Where-Object { $_.Name -eq $serviceName -and $_.Status -eq "Running" }
     if ($serviceStatus) {
-        Write-Log "-----------------Attention: Le service $serviceName est en cours d'exécution.-----------------"
+        Write-Log ">>>>>>>>>>>>>> Attention: Le service $serviceName est en cours d'exécution."
     } else {
-        Write-Log "-----------------Le service $serviceName n'est pas en cours d'exécution.-----------------"
+        Write-Log ">>>>>>>>>>>>>> Le service $serviceName n'est pas en cours d'exécution."
     }
 }
 catch {
-    Write-Log "Erreur lors de l'interrogation du service $serviceName."
-    Write-Log "Détails de l'erreur : $_"
+    Write-Log ">>>>>>>>>>>>>> Erreur lors de l'interrogation du service $serviceName."
+    Write-Log ">>>>>>>>>>>>>> Détails de l'erreur : $_"
 }
 
 $progressBar.Value = 11
@@ -271,8 +270,8 @@ $scheduledTasks | ForEach-Object {
         if ($_.Id -eq 'Execute') {
             foreach ($folder in $suspiciousFolders) {
                 if ($_.Execute -like "*$folder*") {
-                    Write-Log "Tâche suspecte : $taskName"
-                    Write-Log "Chemin suspect : $($_.Execute)"
+                    Write-Log ">>>>>>>>>>>>>> Tâche suspecte : $taskName"
+                    Write-Log ">>>>>>>>>>>>>> Chemin suspect : $($_.Execute)"
                     $foundSuspectTask = $true
                 }
             }
@@ -291,7 +290,7 @@ $scheduledTasks | ForEach-Object {
 }
 
 if (!$foundSuspectTask) {
-    Write-Log "-----------------Aucune tâche suspecte trouvée.-----------------"
+    Write-Log ">>>>>>>>>>>>>> Aucune tâche suspecte trouvée."
 }
 
 $progressBar.Value = 12
@@ -320,9 +319,9 @@ $progressBar.Value = 13
 try {
     $verif = Get-ItemProperty -Path 'HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate' -Name 'WUServer'
     if ($verif.WUServer -match 'http://') {
-        "-----------------Mises à jour WSUS configurées pour utiliser HTTP, vulnérable aux attaques man-in-the-middle.-----------------" | Out-File -FilePath $chemin -Append
+        ">>>>>>>>>>>>>> Mises à jour WSUS configurées pour utiliser HTTP, vulnérable aux attaques man-in-the-middle." | Out-File -FilePath $chemin -Append
     } else {
-        "-----------------Mises à jour WSUS configurées pour utiliser HTTPS, plus sécurisé si la clé existe. Mais elle n'existe pas. Aucune connexion à un serveur WSUS n'est configurée sur l'appareil.-----------------" | Out-File -FilePath $chemin -Append
+        ">>>>>>>>>>>>>> Mises à jour WSUS configurées pour utiliser HTTPS, plus sécurisé si la clé existe. Mais elle n'existe pas. Aucune connexion à un serveur WSUS n'est configurée sur l'appareil." | Out-File -FilePath $chemin -Append
     }
 } catch {
    "<<<<<<<<<<<<<<Cette clé de registre n'existe pas, ou il n'y a pas de mise à jour WSUS configurée>>>>>>>>>>>>>" | Out-File -FilePath $chemin -Append
@@ -337,12 +336,12 @@ try {
     $verifHKCU = Get-ItemProperty -Path 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer' -Name 'AlwaysInstallElevated'
     $verifHKLM = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer' -Name 'AlwaysInstallElevated'
     if ($verifHKCU -and $verifHKLM) {
-        "Attention : L'option 'AlwaysInstallElevated' est activée dans HKCU et HKLM, cela peut être une vulnérabilité de sécurité." | Out-File -FilePath $chemin -Append
+        ">>>>>>>>>>>>>> Attention : L'option 'AlwaysInstallElevated' est activée dans HKCU et HKLM, cela peut être une vulnérabilité de sécurité." | Out-File -FilePath $chemin -Append
     } else {
-        "'-----------------AlwaysInstallElevated' est désactivé ou partiellement activé, ce qui est plus sûr.-----------------" | Out-File -FilePath $chemin -Append
+        "'>>>>>>>>>>>>>> AlwaysInstallElevated' est désactivé ou partiellement activé, ce qui est plus sûr." | Out-File -FilePath $chemin -Append
     }
 } catch {
-   "-----------------Impossible de trouver la clé de registre ou la valeur spécifiée, 'AlwaysInstallElevated' est probablement désactivé.-----------------" | Out-File -FilePath $chemin -Append
+   ">>>>>>>>>>>>>> Impossible de trouver la clé de registre ou la valeur spécifiée, 'AlwaysInstallElevated' est probablement désactivé." | Out-File -FilePath $chemin -Append
 }
 
 $progressBar.Value = 15
@@ -360,18 +359,18 @@ foreach ($path in $paths) {
                  $access.IdentityReference.Value -eq 'Todos' -or
                  $access.IdentityReference.Value -eq "$env:USERDOMAIN\$env:USERNAME")) {
                 if ($access.IdentityReference.Value -eq '2AB4B02F-7385-4\WDAGUtilityAccount') {
-                    Write-Log "-----------------$path a des permissions de modification pour $($access.IdentityReference.Value). C'est normal, car ce compte est utilisé par Windows Defender Application Guard.-----------------" | Out-File -FilePath $chemin -Append
+                    Write-Log ">>>>>>>>>>>>>> $path a des permissions de modification pour $($access.IdentityReference.Value). C'est normal, car ce compte est utilisé par Windows Defender Application Guard." | Out-File -FilePath $chemin -Append
 
                 } else {
-                    Write-Log "-----------------$path a des permissions de modification pour $($access.IdentityReference.Value)-----------------" | Out-File -FilePath $chemin -Append
+                    Write-Log ">>>>>>>>>>>>>> $path a des permissions de modification pour $($access.IdentityReference.Value)" | Out-File -FilePath $chemin -Append
 
-                    Write-Warning ">>>>>>>>>Attention : Cela peut être dangereux, car cela signifie que $($access.IdentityReference.Value) peut modifier les fichiers dans ce chemin." | Out-File -FilePath $chemin -Append
+                    Write-Warning ">>>>>>>>> Attention : Cela peut être dangereux, car cela signifie que $($access.IdentityReference.Value) peut modifier les fichiers dans ce chemin." | Out-File -FilePath $chemin -Append
 
                 }
             }
         }
     } catch {
-        Write-Log ">>>>>>>>>Impossible d'obtenir les permissions pour $path"
+        Write-Log ">>>>>>>>> Impossible d'obtenir les permissions pour $path"
     }
 }
 
@@ -409,10 +408,10 @@ foreach ($vulnerableVersion in $vulnerableVersions) {
 }
 
 if ($isVulnerable) {
-    ">>>>>>>>>>>>>>>Ce système est potentiellement vulnérable à la faille CVE-2019-1388." | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>>> Ce système est potentiellement vulnérable à la faille CVE-2019-1388." | Out-File -FilePath $chemin -Append
 
 } else {
-    ">>>>>>>>>>>>>>>Ce système ne semble pas être vulnérable à la faille CVE-2019-1388." | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>>> Ce système ne semble pas être vulnérable à la faille CVE-2019-1388." | Out-File -FilePath $chemin -Append
 }
 
 $progressBar.Value = 17
@@ -421,9 +420,9 @@ $progressBar.Value = 17
 $secureboot = Confirm-SecureBootUEFI
 
 if ($secureboot -eq $true) {
-    ">>>>>>>>>>>>>>>>>>>Le démarrage sécurisé de l'ordinateur est activé." | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>>>>>>> Le démarrage sécurisé de l'ordinateur est activé." | Out-File -FilePath $chemin -Append
 } else {
-    ">>>>>>>>>>>>>>>>>>Le démarrage sécurisé de l'ordinateur est désactivé." | Out-File -FilePath $chemin -Append
+    ">>>>>>>>>>>>>>>>>> Le démarrage sécurisé de l'ordinateur est désactivé." | Out-File -FilePath $chemin -Append
 }
 
 # Exécuter le fichier journal

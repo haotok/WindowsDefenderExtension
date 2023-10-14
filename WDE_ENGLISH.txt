@@ -1,4 +1,4 @@
-﻿# Load the necessary assemblies
+# Load the necessary assemblies
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -63,9 +63,9 @@ $progressBar.Value = 0
 "`nChecking the Windows Firewall :" | Out-File -FilePath $chemin -Append
 $firewallStatus = (Get-NetFirewallProfile -PolicyStore Local).Enabled
 if ($firewallStatus -contains $false) {
-    ">>>>>>>>>>>>>> Warning: The Windows Firewall is disabled ." | Out-File -FilePath $path -Append
+    "Warning: The Windows Firewall is disabled ." | Out-File -FilePath $path -Append
 } else {
-    ">>>>>>>>>>>>>> The Windows Firewall is enabled." | Out-File -FilePath $path -Append
+    "The Windows Firewall is enabled." | Out-File -FilePath $path -Append
 }
 
  $progressBar.Value = 1
@@ -77,12 +77,12 @@ $antivirus = Get-CimInstance -Namespace "root\SecurityCenter2" -ClassName "AntiV
 
 if ($antivirus) {
     if ($antivirus.productState -eq 266240) { # This number represents "AV up to date"
-        Write-Log ">>>>>>>>>>>>>> An antivirus is active and up-to-date." | Out-File -FilePath $path -Append
+        Write-Log "--------An antivirus is active and up-to-date.-----------" | Out-File -FilePath $path -Append
     } else {
-        Write-Log ">>>>>>>>>>>>>> Warning: No antivirus is active or up-to-date." | Out-File -FilePath $path -Append
+        Write-Log "-----------------Warning: No antivirus is active or up-to-date.-----------------" | Out-File -FilePath $path -Append
     }
 } else {
-    Write-Log ">>>>>>>>>>>>>> Warning: No antivirus is detected on this computer." | Out-File -FilePath $path -Append
+    Write-Log "-----------------Warning: No antivirus is detected on this computer.-----------------" | Out-File -FilePath $path -Append
 }
 
 $progressBar.Value = 2
@@ -93,9 +93,9 @@ $progressBar.Value = 2
 "`nChecking for automatic updates:" | Out-File -FilePath $path -Append
 $autoUpdateStatus = (Get-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU").AUOptions
 if ($autoUpdateStatus -eq 4) {
-    ">>>>>>>>>>>>>> Automatic updates are enabled." | Out-File -FilePath $path -Append
+    "Automatic updates are enabled." | Out-File -FilePath $path -Append
 } else {
-    ">>>>>>>>>>>>>> Warning: automatic updates are not enabled." | Out-File -FilePath $path -Append
+    "------------Warning: automatic updates are not enabled.-----------------" | Out-File -FilePath $path -Append
 }
 
 $progressBar.Value = 3
@@ -114,7 +114,7 @@ function Write-Log {
 }
 
 # Checking if there are pending security updates in Windows Update.
-Write-Log ">>>>>>>>>>>>>> Checking if there are pending security updates in Windows Update :"
+Write-Log "-----------------Checking if there are pending security updates in Windows Update :-----------------"
 $Session = New-Object -ComObject "Microsoft.Update.Session"
 $Searcher = $Session.CreateUpdateSearcher()
 $Criteria = "IsInstalled=0 and Type='Software' and IsHidden=0 and CategoryIDs contains 'e6cf1350-c01b-414d-a61f-263d14d133b4'"
@@ -122,9 +122,9 @@ $SearchResult = $Searcher.Search($Criteria).Updates
 
 if ($SearchResult.Count -gt 0) {
     foreach ($Update in $SearchResult) {
-        Write-Log ">>>>>>>>>>>>>> Update pending : $($Update.Title)"
+        Write-Log "Update pending : $($Update.Title)"
     }
-} else {">>>>>>>>>>>>>> No security update pending." | Out-File -FilePath $path -Append
+} else {"-----------------No security update pending.-----------------" | Out-File -FilePath $path -Append
 }
 
 $progressBar.Value = 4
@@ -133,12 +133,12 @@ $progressBar.Value = 4
 $adminAccounts = Get-LocalUser | Where-Object { $_.Enabled -eq $true -and $_.SID -like "S-1-5-21-*-500" }
 
 if ($adminAccounts) {
-    Write-Log ">>>>>>>>>>>>>> Warning: The following administrator accounts are activated:"
+    Write-Log "-----------Warning: The following administrator accounts are activated:----------"
     $adminAccounts | ForEach-Object { Write-host "Compte: $($_.Name)" }
 $adminAccounts | ForEach-Object { "Compte: $($_.Name)" | Out-File -FilePath $path -Append }
 
 } else {
-    ">>>>>>>>>>>>>> No administrator account is activated." | Out-File -FilePath $path -Append
+    "-----------------No administrator account is activated.-----------------" | Out-File -FilePath $path -Append
 }
 
 $progressBar.Value = 5
@@ -152,10 +152,11 @@ foreach ($connection in $connections) {
     $localPort = $connection.LocalPort
     $remotePort = $connection.RemotePort
     if ($suspiciousPorts -contains $localPort -or $suspiciousPorts -contains $remotePort) {
-        Write-Log ">>>>>>>>>>>>>> Suspicious connection detected:" -ForegroundColor Red
-        Write-Log ">>>>>>>>>>>>>> Local: $($connection.LocalAddress):$localPort"
-        Write-Log ">>>>>>>>>>>>>> Remote: $($connection.RemoteAddress):$remotePort"
-        Write-Log ">>>>>>>>>>>>>> CHECK IF THESE OPEN PORTS ARE LEGITIMATE AND USEFUL WITH THE COMMAND: #Get-NetTCPConnection | Where-Object { $_.State -eq 'Established' }"
+        Write-Log "Suspicious connection detected:" -ForegroundColor Red
+        Write-Log "Local: $($connection.LocalAddress):$localPort"
+        Write-Log "Remote: $($connection.RemoteAddress):$remotePort"
+        Write-Log "CHECK IF THESE OPEN PORTS ARE LEGITIMATE AND USEFUL WITH THE COMMAND: #Get-NetTCPConnection | Where-Object { $_.State -eq 'Established' }"
+        Write-Log "----------------------------------------"
     }
 }
 
@@ -179,7 +180,7 @@ $portsDescriptions = @{
 foreach ($port in $portsDescriptions.Keys) {
     if (Test-NetConnection -ComputerName localhost -Port $port -InformationLevel Quiet) {
         $message = $portsDescriptions[$port]
-        Write-Log ">>>>>>>>>>>>>> Open port: $port - $message"
+        Write-Log "Open port: $port - $message"
     }
 }
 
@@ -194,13 +195,13 @@ $progressBar.Value = 7
 $sharedFolders = Get-SmbShare | Where-Object -Property Name -ne 'IPC$'
 
 if ($sharedFolders) {
-    Write-Log ">>>>>>>>>>>>>> Caution: The following shared folders have been found."
-    $sharedFolders | ForEach-Object { Write-Log ">>>>>>>>>>>>>> Folder: $($_.Name)" }
-    $sharedFolders | ForEach-Object { ">>>>>>>>>>>>>> Folder: $($_.Name)" | Out-File -FilePath $path -Append }
+    Write-Log "Attention: Les dossiers partagés suivants ont été trouvés :"
+    $sharedFolders | ForEach-Object { Write-host "Dossier: $($_.Name)" }
+    $sharedFolders | ForEach-Object { "Dossier: $($_.Name)" | Out-File -FilePath $path -Append }
 
 } else {
 
-    ">>>>>>>>>>>>>> No shared folders have been found." | Out-File -FilePath $path -Append
+    "-----------------Aucun dossier partagé n'a été trouvé.-----------------" | Out-File -FilePath $path -Append
 }
 
 
@@ -210,12 +211,12 @@ $progressBar.Value = 8
 Write-Log "`nChecking UAC activation:" -ForegroundColor Yellow
 $UACStatusCheck = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System").EnableLUA
 if ($UACStatusCheck -eq 0) {
-    Write-Log ">>>>>>>>>>>>>> Warning: UAC (User Account Control) is disabled."
-    $alertMessage = ">>>>>>>>>>>>>> To enable UAC, please open the Control Panel, click on 'User Accounts', then click on 'Change User Account Control settings' and move the slider upwards."
+    Write-Log "Warning: UAC (User Account Control) is disabled."
+    $alertMessage = "-----------------To enable UAC, please open the Control Panel, click on 'User Accounts', then click on 'Change User Account Control settings' and move the slider upwards.-----------------"
     $wshell = New-Object -ComObject Wscript.Shell
-    $wshell.Popup($alertMessage, 0, ">>>>>>>>>>>>>> UAC disabled", 0x1)
+    $wshell.Popup($alertMessage, 0, "-----------------UAC disabled-----------------", 0x1)
 } else {
-    Write-Log ">>>>>>>>>>>>>> UAC (User Account Control) is enabled."
+    Write-Log "-----------------UAC (User Account Control) is enabled.-----------------"
 }
 
 $progressBar.Value = 9
@@ -225,9 +226,9 @@ $progressBar.Value = 9
 Write-Log "`nChecking BitLocker activation:"
 $BitLockerActivationStatus = Get-BitLockerVolume -MountPoint C:
 if ($BitLockerActivationStatus.ProtectionStatus -ne "On") {
-    Write-Log ">>>>>>>>>>>>>> Warning: BitLocker is not enabled on the system drive. PLEASE ENABLE IT FOR SECURITY REASONS."
+    Write-Log "-----------------Warning: BitLocker is not enabled on the system drive. PLEASE ENABLE IT FOR SECURITY REASONS.-----------------"
 } else {
-    Write-Log ">>>>>>>>>>>>>> BitLocker is enabled on the system drive."
+    Write-Log "-----------------BitLocker is enabled on the system drive.-----------------"
 }
 
 $progressBar.Value = 10
@@ -239,14 +240,14 @@ Write-Log "`nChecking the service $checkedServiceName"
 try {
     $currentServiceStatus = Get-Service | Where-Object { $_.Name -eq $checkedServiceName -and $_.Status -eq "Running" }
     if ($currentServiceStatus) {
-        Write-Log ">>>>>>>>>>>>>> Warning: The service $checkedServiceName is running."
+        Write-Log "-----------------Warning: The service $checkedServiceName is running.-----------------"
     } else {
-        Write-Log ">>>>>>>>>>>>>> The service $checkedServiceName is not running."
+        Write-Log "-----------------The service $checkedServiceName is not running.-----------------"
     }
 }
 catch {
-    Write-Log ">>>>>>>>>>>>>> Error while querying the service $checkedServiceName."
-    Write-Log ">>>>>>>>>>>>>> Error details: $_"
+    Write-Log "Error while querying the service $checkedServiceName."
+    Write-Log "Error details: $_"
 }
 
 $progressBar.Value = 11
@@ -266,8 +267,8 @@ $allScheduledTasks | ForEach-Object {
         if ($_.Id -eq 'Execute') {
             foreach ($folder in $potentialRiskyFolders) {
                 if ($_.Execute -like "*$folder*") {
-                    Write-Log ">>>>>>>>>>>>>> Suspicious task: $currentTaskName"
-                    Write-Log ">>>>>>>>>>>>>> Suspicious path: $($_.Execute)"
+                    Write-Log "Suspicious task: $currentTaskName"
+                    Write-Log "Suspicious path: $($_.Execute)"
                     $detectedSuspiciousTask = $true
                 }
             }
@@ -278,15 +279,15 @@ $allScheduledTasks | ForEach-Object {
 
     foreach ($trigger in $currentTaskTriggers) {
         if ($trigger.Repetition.Duration -eq 'PT1M') {
-            Write-Log ">>>>>>>>>>>>>> Suspicious task: $currentTaskName"
-            Write-Log ">>>>>>>>>>>>>> Suspicious frequency: Every minute"
+            Write-Log "Suspicious task: $currentTaskName"
+            Write-Log "Suspicious frequency: Every minute"
             $detectedSuspiciousTask = $true
         }
     }
 }
 
 if (!$detectedSuspiciousTask) {
-    Write-Log ">>>>>>>>>>>>>> No suspicious tasks found."
+    Write-Log "-----------------No suspicious tasks found.-----------------"
 }
 
 $progressBar.Value = 12
@@ -299,14 +300,14 @@ $progressBar.Value = 13
 
 # Check if the network is using a non-SSL WSUS update
 
-">>>>>>>>>>>>>> Checking if the network is using a non-SSL WSUS update:" | Out-File -FilePath $path -Append
+"Checking if the network is using a non-SSL WSUS update:" | Out-File -FilePath $path -Append
 
 try {
     $verification = Get-ItemProperty -Path 'HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate' -Name 'WUServer'
     if ($verification.WUServer -match 'http://') {
-        ">>>>>>>>>>>>>> WSUS updates configured to use HTTP, vulnerable to man-in-the-middle attacks." | Out-File -FilePath $path -Append
+        "-----------------WSUS updates configured to use HTTP, vulnerable to man-in-the-middle attacks.-----------------" | Out-File -FilePath $path -Append
     } else {
-        ">>>>>>>>>>>>>> WSUS updates configured to use HTTPS, more secure if the key exists. But it doesn't exist. No connection to a WSUS server is configured on the device." | Out-File -FilePath $path -Append
+        "-----------------WSUS updates configured to use HTTPS, more secure if the key exists. But it doesn't exist. No connection to a WSUS server is configured on the device.-----------------" | Out-File -FilePath $path -Append
     }
 } catch {
    "<<<<<<<<<<<<<<This registry key does not exist, or there are no WSUS updates configured>>>>>>>>>>>>>" | Out-File -FilePath $path -Append
@@ -322,12 +323,12 @@ try {
     $verificationHKCU = Get-ItemProperty -Path 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer' -Name 'AlwaysInstallElevated'
     $verificationHKLM = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer' -Name 'AlwaysInstallElevated'
     if ($verificationHKCU -and $verificationHKLM) {
-        ">>>>>>>>>>>>>> Warning: The 'AlwaysInstallElevated' option is enabled in both HKCU and HKLM, this can be a security vulnerability." | Out-File -FilePath $path -Append
+        "Warning: The 'AlwaysInstallElevated' option is enabled in both HKCU and HKLM, this can be a security vulnerability." | Out-File -FilePath $path -Append
     } else {
-        ">>>>>>>>>>>>>> 'AlwaysInstallElevated' is either disabled or partially enabled, which is safer." | Out-File -FilePath $path -Append
+        "----------------- 'AlwaysInstallElevated' is either disabled or partially enabled, which is safer.-----------------" | Out-File -FilePath $path -Append
     }
 } catch {
-   ">>>>>>>>>>>>>> Unable to find the specified registry key or value, 'AlwaysInstallElevated' is likely disabled." | Out-File -FilePath $path -Append
+   "-----------------Unable to find the specified registry key or value, 'AlwaysInstallElevated' is likely disabled.-----------------" | Out-File -FilePath $path -Append
 }
 
 $progressBar.Value = 15
@@ -346,18 +347,18 @@ foreach ($singlePath in $paths) {
                  $permission.IdentityReference.Value -eq 'All' -or
                  $permission.IdentityReference.Value -eq "$env:USERDOMAIN\$env:USERNAME")) {
                 if ($permission.IdentityReference.Value -eq '2AB4B02F-7385-4\WDAGUtilityAccount') {
-                    Write-Log ">>>>>>>>>>>>>> $singlePath has modify permissions for $($permission.IdentityReference.Value). This is expected, as this account is used by Windows Defender Application Guard." | Out-File -FilePath $path -Append
+                    Write-Log "-----------------$singlePath has modify permissions for $($permission.IdentityReference.Value). This is expected, as this account is used by Windows Defender Application Guard.-----------------" | Out-File -FilePath $path -Append
 
                 } else {
-                    Write-Log ">>>>>>>>>>>>>> $singlePath has modify permissions for $($permission.IdentityReference.Value)" | Out-File -FilePath $path -Append
+                    Write-Log "-----------------$singlePath has modify permissions for $($permission.IdentityReference.Value)-----------------" | Out-File -FilePath $path -Append
 
-                    Write-Warning ">>>>>>>>> Warning: This can be dangerous, as this means that $($permission.IdentityReference.Value) can modify files in this path." | Out-File -FilePath $path -Append
+                    Write-Warning ">>>>>>>>>Warning: This can be dangerous, as this means that $($permission.IdentityReference.Value) can modify files in this path." | Out-File -FilePath $path -Append
 
                 }
             }
         }
     } catch {
-        Write-Log ">>>>>>>>> Unable to fetch permissions for $singlePath"
+        Write-Log ">>>>>>>>>Unable to fetch permissions for $singlePath"
     }
 }
 
@@ -393,10 +394,10 @@ foreach ($vulnerableVersion in $vulnerableVersions) {
 }
 
 if ($isVulnerable) {
-    ">>>>>>>>>>>>>>> This system is potentially vulnerable to the CVE-2019-1388 flaw." | Out-File -FilePath $path -Append
+    ">>>>>>>>>>>>>>>This system is potentially vulnerable to the CVE-2019-1388 flaw." | Out-File -FilePath $path -Append
 
 } else {
-    ">>>>>>>>>>>>>>> This system does not appear to be vulnerable to the CVE-2019-1388 flaw." | Out-File -FilePath $path -Append
+    ">>>>>>>>>>>>>>>This system does not appear to be vulnerable to the CVE-2019-1388 flaw." | Out-File -FilePath $path -Append
 }
 
 $progressBar.Value = 17
@@ -406,9 +407,9 @@ $progressBar.Value = 17
 $secureBootStatus = Confirm-SecureBootUEFI
 
 if ($secureBootStatus -eq $true) {
-    ">>>>>>>>>>>>>>>>>>> The computer's secure boot is enabled." | Out-File -FilePath $path -Append
+    ">>>>>>>>>>>>>>>>>>>The computer's secure boot is enabled." | Out-File -FilePath $path -Append
 } else {
-    ">>>>>>>>>>>>>>>>>>> The computer's secure boot is disabled." | Out-File -FilePath $path -Append
+    ">>>>>>>>>>>>>>>>>>>The computer's secure boot is disabled." | Out-File -FilePath $path -Append
 }
 
 
