@@ -1,3 +1,45 @@
+--------------ENGLISH--------------------
+
+-Windows Defender PowerShell Script Extension-
+
+This PowerShell script I've created acts as an extension for Windows Defender. Its primary goal is to enhance the security of the Windows operating system by automating several essential checks.
+
+Features
+Security Check:
+
+- Checks if the Windows Firewall is enabled.
+- Checks if Windows Defender is activated.
+- Checks if automatic updates are turned on.
+- Checks for pending security updates in Windows Update.
+- Verifies administrator accounts.
+- Scans for suspicious connections on your PC.
+- Scans specific ports to detect potential malicious activities. (Example: Port 25 for SMTP, Port 3389 for RDP, etc.)
+- Checks the status of UAC (User Account Control) activation.
+- Verifies BitLocker activation for data security.
+- Checks the status of specific services such as Telnet, LPD Service, RemoteRegistry.
+- Scans scheduled tasks for potential suspicious activities.
+- Updates the viral database for up-to-date protection.
+- Checks if the network uses a non-SSL WSUS update.
+- Checks if the AlwaysInstallElevated option is enabled, which could allow elevated installations without UAC notification.
+- Scans read/write permissions for all paths and all local users.
+
+Report:
+
+At the end of the checks, a .txt report is generated to provide a detailed overview of the findings.
+User Interface:
+
+The script also offers a simplified user interface with buttons for quick access to firewall settings, Windows Defender, Windows Update, PC user management, computer management, and user account control settings.
+
+How to Use:
+- Run the script with administrator privileges.
+- Follow the on-screen instructions.
+- At the end of the checks, review the generated report for detailed information.
+- Use the user interface for quick access to essential PC settings.
+  
+Contribution:
+Feel free to submit pull requests to enhance the script or report issues through the "Issues" section.
+
+------------------------FRANCAIS--------------------------
 # Extension Windows Defender PowerShell Script
 
 Ce script PowerShell que j'ai créé agit comme une extension pour Windows Defender. Son principal objectif est d'améliorer la sécurité du système d'exploitation Windows en automatisant plusieurs vérifications essentielles.
